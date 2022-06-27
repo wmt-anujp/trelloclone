@@ -37,7 +37,6 @@
 <body>
     @include('includes/toastr')
     @include('includes/message-block')
-    @include('includes/header')
     <div class="container">
         @yield('csrf')
         @yield('css')

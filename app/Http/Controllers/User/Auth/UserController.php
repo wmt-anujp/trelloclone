@@ -3,7 +3,11 @@
 namespace App\Http\Controllers\User\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\userSignupFormRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -14,7 +18,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
+        return view('User.signup');
     }
 
     /**
@@ -24,7 +28,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        //
+        return view('User.dashboard');
     }
 
     /**
@@ -33,9 +37,29 @@ class UserController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(userSignupFormRequest $request)
     {
-        //
+        try {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
+            // Auth::guard('user')->login($user);
+            return redirect()->route('user.create')->with('success', 'SignUp Successfull');
+        } catch (\Exception $exception) {
+            return redirect()->back()->with('error', 'Temporary Server Error.');
+        }
+    }
+
+    public function userLogout()
+    {
+        try {
+            Auth::guard('user')->logout();
+            return redirect()->route('user.Login');
+        } catch (\Throwable $th) {
+            return redirect()->back()->with('error', 'Temporary Server Error.');
+        }
     }
 
     /**

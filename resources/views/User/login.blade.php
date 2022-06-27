@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.masster')
 @section('title')
     Login
 @endsection
@@ -31,7 +31,7 @@
         </form>
     </div>
     <div class="box">
-      <p>Don't have an Account? <a href="">Sign Up</a></p>
+      <p>Don't have an Account? <a href="{{route('user.index')}}">Sign Up</a></p>
     </div>
 </div>
 @endsection

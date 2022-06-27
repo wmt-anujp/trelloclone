@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\User\Auth\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,6 +14,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('User.signup');
+Route::resource('user', UserController::class);
+Route::namespace('User')->middleware('backbutton')->group(function () {
+    Route::namespace('Auth')->middleware('guest')->group(function () {
+        Route::get('/', function () {
+            return view('User.login');
+        })->name('user.Login');
+        Route::get('user-logout', [UserController::class, 'userLogout'])->withoutMiddleware('guest')->name('user.Logout');
+    });
 });

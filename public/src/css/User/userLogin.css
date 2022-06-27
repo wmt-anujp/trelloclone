@@ -36,15 +36,6 @@ a {
     flex-grow: 1;
 }
 
-.heading {
-    margin: 22px auto 12px;
-    background-image: url("https://www.instagram.com/static/bundles/es6/sprite_core_b20f2a3cd7e4.png/b20f2a3cd7e4.png");
-    background-position: -98px 0;
-    height: 51px;
-    width: 177px;
-    overflow: hidden;
-}
-
 .field {
     margin: 10px 0;
     position: relative;

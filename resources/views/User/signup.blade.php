@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.masster')
 @section('title')
     Sign Up
 @endsection
@@ -11,7 +11,7 @@
         <div class="heading"></div>
             <h5 class="mb-1">Create Account</h5>
             <div>
-                <form action="" method="POST" id="usersignup" enctype="multipart/form-data">
+                <form action="{{route('user.store')}}" method="POST" id="usersignup" enctype="multipart/form-data">
                     @csrf
                     <div class="field">
                         <input type="text" class="form-control border-1" name="name" id="name" placeholder="Enter Your Name" value="{{old('name')}}">
@@ -42,7 +42,7 @@
             </div>
     </div>
     <div class="box">
-        <p>Already have an account? <a class="signup" href="">Log In</a></p>
+        <p>Already have an account? <a class="signup" href="{{route('user.Login')}}">Log In</a></p>
     </div>
 </div>
 @endsection
