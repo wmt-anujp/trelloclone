@@ -20,6 +20,10 @@ Route::namespace('User')->middleware('backbutton')->group(function () {
         Route::get('/', function () {
             return view('User.login');
         })->name('user.Login');
+        Route::post('user-login', [UserController::class, 'userLogin'])->name('user.Logins');
         Route::get('user-logout', [UserController::class, 'userLogout'])->withoutMiddleware('guest')->name('user.Logout');
+    });
+    Route::middleware('userAuth:user')->group(function () {
+        Route::get('user-dashboard', [UserController::class, 'userDashboard'])->name('user.Dashboard');
     });
 });

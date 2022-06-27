@@ -13,8 +13,8 @@
     <div class="box">
         <div class="heading"></div>
         <h5 class="mb-1">User Login</h5>
-        <form class="login-form mb-3" action="" method="POST" id="userlogin">
-          {{@csrf_field()}}
+        <form class="login-form mb-3" action="{{route('user.Logins')}}" method="POST" id="userlogin">
+          @csrf
             <div class="field">
                 <input id="email" type="email" name="email" placeholder="Enter Your Email">
                 @if ($errors->has('email'))

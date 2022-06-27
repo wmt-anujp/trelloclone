@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\userLoginFormRequest;
 use App\Http\Requests\User\userSignupFormRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -28,9 +29,13 @@ class UserController extends Controller
      */
     public function create()
     {
-        return view('User.dashboard');
+        //
     }
 
+    public function userDashboard()
+    {
+        return view('User.dashboard');
+    }
     /**
      * Store a newly created resource in storage.
      *
@@ -45,10 +50,23 @@ class UserController extends Controller
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
             ]);
-            // Auth::guard('user')->login($user);
-            return redirect()->route('user.create')->with('success', 'SignUp Successfull');
+            Auth::guard('user')->login($user);
+            return redirect()->route('user.Dashboard')->with('success', 'SignUp Successfull');
         } catch (\Exception $exception) {
             return redirect()->back()->with('error', 'Temporary Server Error.');
+        }
+    }
+
+    public function userLogin(userLoginFormRequest $request)
+    {
+        try {
+            if (Auth::guard('user')->attempt($request->only('email', 'password'))) {
+                return redirect()->route('user.Dashboard')->with('success', 'Login Successfull');
+            } else {
+                return redirect()->back()->with('error', 'Please Check Credentials');
+            }
+        } catch (\Exception $exception) {
+            return redirect()->back()->with('error', 'Temporary Server error');
         }
     }
 
