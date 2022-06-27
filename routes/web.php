@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\User\TaskController;
 use App\Http\Controllers\User\Auth\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::resource('user', UserController::class);
+Route::resource('task', TaskController::class);
 Route::namespace('User')->middleware('backbutton')->group(function () {
     Route::namespace('Auth')->middleware('guest')->group(function () {
         Route::get('/', function () {

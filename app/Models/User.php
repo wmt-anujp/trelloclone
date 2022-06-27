@@ -13,4 +13,9 @@ class User extends Authenticatable
     protected $table = 'users';
     protected $guard = 'user';
     protected $fillable = ['name', 'email', 'password'];
+
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
+    }
 }

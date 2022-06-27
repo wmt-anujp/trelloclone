@@ -1,16 +1,15 @@
 <?php
 
-namespace App\Http\Controllers\User\Auth;
+namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\User\userLoginFormRequest;
-use App\Http\Requests\User\userSignupFormRequest;
+use App\Http\Requests\Task\addTaskFormRequest;
+use App\Models\Task;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
-class UserController extends Controller
+class TaskController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -19,7 +18,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        return view('User.signup');
+        //
     }
 
     /**
@@ -29,54 +28,32 @@ class UserController extends Controller
      */
     public function create()
     {
-        //
+        $user = User::where('id', '!=', Auth::guard('user')->id())->get();
+        return view('Task.addNewTask', ['users' => $user]);
     }
 
-    public function userDashboard()
-    {
-
-        return view('User.dashboard');
-    }
     /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(userSignupFormRequest $request)
+    public function store(addTaskFormRequest $request)
     {
+        // dd($request->all());
+        $assigned_to = $request->emp;
+        $assigned_to = implode(",", $assigned_to);
         try {
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
+            Task::create([
+                'assigned_by' => Auth::guard('user')->user()->id,
+                'assigned_to' => $assigned_to,
+                'title' => $request->title,
+                'description' => $request->description,
+                'due_date' => $request->deadline,
             ]);
-            Auth::guard('user')->login($user);
-            return redirect()->route('user.Dashboard')->with('success', 'SignUp Successfull');
+            return redirect()->route('user.Dashboard')->with('success', 'Task Assigned Successfully');
         } catch (\Exception $exception) {
-            return redirect()->back()->with('error', 'Temporary Server Error.');
-        }
-    }
-
-    public function userLogin(userLoginFormRequest $request)
-    {
-        try {
-            if (Auth::guard('user')->attempt($request->only('email', 'password'))) {
-                return redirect()->route('user.Dashboard')->with('success', 'Login Successfull');
-            } else {
-                return redirect()->back()->with('error', 'Please Check Credentials');
-            }
-        } catch (\Exception $exception) {
-            return redirect()->back()->with('error', 'Temporary Server error');
-        }
-    }
-
-    public function userLogout()
-    {
-        try {
-            Auth::guard('user')->logout();
-            return redirect()->route('user.Login');
-        } catch (\Throwable $th) {
+            dd($exception);
             return redirect()->back()->with('error', 'Temporary Server Error.');
         }
     }

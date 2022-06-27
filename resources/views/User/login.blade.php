@@ -2,9 +2,6 @@
 @section('title')
     Login
 @endsection
-@section('csrf')
-    
-@endsection
 @section('css')
     <link rel="stylesheet" href="src/css/User/userLogin.css">
 @endsection
