@@ -42,15 +42,14 @@ class TaskController extends Controller
     {
         // dd($request->all());
         $assigned_to = $request->emp;
-        $assigned_to = implode(",", $assigned_to);
         try {
-            Task::create([
+            $task = Task::create([
                 'assigned_by' => Auth::guard('user')->user()->id,
-                'assigned_to' => $assigned_to,
                 'title' => $request->title,
                 'description' => $request->description,
                 'due_date' => $request->deadline,
             ]);
+            $task->users()->attach($request->emp);
             return redirect()->route('user.Dashboard')->with('success', 'Task Assigned Successfully');
         } catch (\Exception $exception) {
             dd($exception);

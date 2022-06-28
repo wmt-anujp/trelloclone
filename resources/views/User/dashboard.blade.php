@@ -13,4 +13,18 @@
             </div>
         </div>
     </div>
+    <div class="row g-2 mt-5 justify-content-start">
+        {{dd($tasks)}}
+        @foreach ($tasks as $task)
+            {{-- @if () --}}
+                <div class="col-12 col-md-3">
+                    <a href=""></a>
+                </div>
+            {{-- @elseif() --}}
+                <div class="col-12 col-md-3">
+                    <a href=""></a>
+                </div>
+            {{-- @endif --}}
+        @endforeach
+</div>
 @endsection

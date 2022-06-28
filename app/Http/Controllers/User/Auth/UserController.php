@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\userLoginFormRequest;
 use App\Http\Requests\User\userSignupFormRequest;
+use App\Models\Task;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -34,8 +35,8 @@ class UserController extends Controller
 
     public function userDashboard()
     {
-
-        return view('User.dashboard');
+        $tasks = Task::all();
+        return view('User.dashboard', ['tasks' => $tasks]);
     }
     /**
      * Store a newly created resource in storage.
