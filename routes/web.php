@@ -27,5 +27,6 @@ Route::namespace('User')->middleware('backbutton')->group(function () {
     });
     Route::middleware('userAuth:user')->group(function () {
         Route::get('user-dashboard', [UserController::class, 'userDashboard'])->name('user.Dashboard');
+        Route::post('comment', [TaskController::class, 'newComment'])->name('add.Comment');
     });
 });

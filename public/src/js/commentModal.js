@@ -1,10 +1,10 @@
 var userId = 0;
-var postId = 0;
+var taskId = 0;
 $(document).ready(function () {
     $(".commentbtn").click(function (event) {
         event.preventDefault();
         userId = event.target.dataset["user"];
-        postId = event.target.dataset["post"];
+        taskId = event.target.dataset["task"];
         $("#cmntmodal").modal("show");
     });
 
@@ -14,7 +14,7 @@ $(document).ready(function () {
             url: urlComment,
             data: {
                 userId: userId,
-                postId: postId,
+                taskId: taskId,
                 comment: $("#comment").val(),
                 _token: token,
             },

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Task\addTaskFormRequest;
+use App\Models\Comment;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -64,15 +65,21 @@ class TaskController extends Controller
     public function show($id)
     {
         $tasks = Task::with('users')->find($id);
-        return view('Task.taskDetails', ['task' => $tasks]);
+        return view('Task.taskDetails', ['task' => $tasks, 'user' => Auth::guard('user')->user()->id]);
     }
 
-    public function newComment()
+    public function newComment(Request $request)
     {
         try {
             if (!Auth::guard('user')->user()) {
                 return back();
             }
+            Comment::create([
+                'user_id' => $request->userId,
+                'task_id' => $request->taskId,
+                'comment' => $request->comment,
+            ]);
+            return redirect()->back()->with('success', 'Comment Added');
         } catch (\Exception $exception) {
             return redirect()->back()->with('error', 'Temporary Server Error.');
         }

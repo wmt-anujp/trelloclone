@@ -20,7 +20,7 @@
                     </div>
             </div>
             <div>
-                <a href="" class="btn btn-primary mt-2 commentbtn">Comment</a>
+                <a data-task={{$task->id}} data-user={{$user}} class="btn btn-primary mt-2 commentbtn">Comment</a>
             </div>
             <div class="mt-4">
                 <h4 style="color: green">All Comments</h4>
@@ -63,7 +63,7 @@
 @section('js')
     <script>
         var token="{{csrf_token()}}";
-        var urlComment="{{route('')}}";
+        var urlComment="{{route('add.Comment')}}";
     </script>
     <script src="{{URL::to('src/js/commentModal.js')}}"></script>
 @endsection
