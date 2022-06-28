@@ -25,11 +25,16 @@
             <div class="mt-4">
                 <h4 style="color: green">All Comments</h4>
                 <hr>
-                {{-- @foreach ($comments as $comment)
+                @foreach ($comments as $comment)
                     <p><span style="color: green">Commented By: </span>{{$comment->user->name}}</p>
-                    <p>{{$comment->comment}}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <p style="margin: 0" id="comment_tag">{{$comment->comment}}</p>
+                        @if ($comment->user_id===Auth::guard('user')->user()->id)
+                            <a data-task={{$task->id}} data-user={{$user}} data-comment={{$comment->id}} class="btn btn-sm btn-outline-info cmntupbtn">Edit</a>
+                        @endif
+                    </div>
                     <hr>
-                @endforeach --}}
+                @endforeach
             </div>
         </div>
     </div>
@@ -59,11 +64,38 @@
     </div>
 </div>
 {{-- comment modal ends --}}
+
+{{-- comment update starts --}}
+<div class="modal fade" tabindex="-1" id="cmntupmodal">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Comment</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form method="POST" id="cmntform">
+                @csrf
+                <div class="form-group">
+                    <label for="comment">Update Comment</label>
+                    <textarea class="form-control" name="comment" placeholder="Enter Comment" id="updatecomment" rows="5"></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary" id="modalsavee">Update Comment</button>
+        </div>
+      </div>
+    </div>
+</div>
+{{-- comment update ends --}}
 @endsection
 @section('js')
     <script>
         var token="{{csrf_token()}}";
         var urlComment="{{route('add.Comment')}}";
+        var urlUpdateComment="{{route('update.Comment')}}";
     </script>
     <script src="{{URL::to('src/js/commentModal.js')}}"></script>
 @endsection

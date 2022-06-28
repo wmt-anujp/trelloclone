@@ -65,7 +65,8 @@ class TaskController extends Controller
     public function show($id)
     {
         $tasks = Task::with('users')->find($id);
-        return view('Task.taskDetails', ['task' => $tasks, 'user' => Auth::guard('user')->user()->id]);
+        $comment = $tasks->comments;
+        return view('Task.taskDetails', ['task' => $tasks, 'user' => Auth::guard('user')->user()->id, 'comments' => $comment]);
     }
 
     public function newComment(Request $request)
@@ -80,6 +81,21 @@ class TaskController extends Controller
                 'comment' => $request->comment,
             ]);
             return redirect()->back()->with('success', 'Comment Added');
+        } catch (\Exception $exception) {
+            return redirect()->back()->with('error', 'Temporary Server Error.');
+        }
+    }
+
+    public function updateComment(Request $request)
+    {
+        try {
+            if (!Auth::guard('user')->user()) {
+                return back();
+            }
+            Comment::where('id', $request->cmntId)->update([
+                'comment' => $request->comment,
+            ]);
+            return redirect()->back()->with('success', 'Comment updated');
         } catch (\Exception $exception) {
             return redirect()->back()->with('error', 'Temporary Server Error.');
         }

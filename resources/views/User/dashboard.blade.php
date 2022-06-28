@@ -13,11 +13,6 @@
             </div>
         </div>
         <div class="row g-2 mt-3 justify-content-start">
-            {{-- @foreach ($tasks as $item)
-                @foreach ($item->users as $items)
-                    {{dd($items)}}
-                @endforeach
-            @endforeach --}}
             <h3 style="color: green">Tasks List</h3>
             @foreach ($tasks as $task)
                 @foreach ($task->users as $tasksuser)
