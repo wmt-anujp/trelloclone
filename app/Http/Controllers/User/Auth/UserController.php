@@ -35,7 +35,7 @@ class UserController extends Controller
 
     public function userDashboard()
     {
-        $tasks = Task::all();
+        $tasks = Task::with('users')->get();
         return view('User.dashboard', ['tasks' => $tasks]);
     }
     /**

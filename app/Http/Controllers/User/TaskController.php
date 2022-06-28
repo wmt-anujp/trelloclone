@@ -40,8 +40,6 @@ class TaskController extends Controller
      */
     public function store(addTaskFormRequest $request)
     {
-        // dd($request->all());
-        $assigned_to = $request->emp;
         try {
             $task = Task::create([
                 'assigned_by' => Auth::guard('user')->user()->id,
@@ -65,7 +63,19 @@ class TaskController extends Controller
      */
     public function show($id)
     {
-        //
+        $tasks = Task::with('users')->find($id);
+        return view('Task.taskDetails', ['task' => $tasks]);
+    }
+
+    public function newComment()
+    {
+        try {
+            if (!Auth::guard('user')->user()) {
+                return back();
+            }
+        } catch (\Exception $exception) {
+            return redirect()->back()->with('error', 'Temporary Server Error.');
+        }
     }
 
     /**
