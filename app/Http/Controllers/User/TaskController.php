@@ -131,7 +131,7 @@ class TaskController extends Controller
                 'due_date' => $request->deadline,
             ]);
             $task_update->users()->sync($request->emp);
-            return redirect()->route('task.index')->with('success', 'Task Updated');
+            return redirect()->route('task.show', ['task' => $id])->with('success', 'Task Updated');
         } catch (\Exception $exception) {
             dd($exception);
             return redirect()->back()->with('error', 'Temporary Server Error.');

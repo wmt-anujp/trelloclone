@@ -14,7 +14,7 @@
             </div>
         </div>
         <div class="row g-2 mt-3 justify-content-start">
-            <h3 style="color: green">Tasks List</h3>
+            <h3 style="color: green">Tasks assigned to Me</h3>
             @foreach ($tasks as $task)
                 @foreach ($task->users as $tasksuser)
                     @if ($tasksuser->pivot->user_id===Auth::guard('user')->user()->id)
