@@ -40,8 +40,8 @@
             <div class="mt-4">
                 <h4 style="color: green">All Comments</h4>
                 <hr>
-                @foreach ($comments as $comment)
-                    <div class="test">
+                <div class="test">
+                    @foreach ($comments as $comment)
                         <p><span style="color: green">Commented By: </span>{{$comment->user->name}}</p>
                         <div class="d-flex justify-content-between align-items-center">
                             <p style="margin: 0" id="comment_tag">{{$comment->comment}}</p>
@@ -50,8 +50,8 @@
                             @endif
                         </div>
                         <hr>
-                    </div>
-                @endforeach
+                    @endforeach
+                </div>
             </div>
         </div>
     </div>

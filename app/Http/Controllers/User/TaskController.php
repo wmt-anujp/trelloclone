@@ -80,7 +80,7 @@ class TaskController extends Controller
                 'task_id' => $request->taskId,
                 'comment' => $request->comment,
             ]);
-            return response()->json([$comments]);
+            return response()->json($comments);
         } catch (\Exception $exception) {
             return redirect()->back()->with('error', 'Temporary Server Error.');
         }

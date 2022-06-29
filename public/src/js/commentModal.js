@@ -1,6 +1,9 @@
 var userId = 0;
 var taskId = 0;
 $(document).ready(function () {
+    function comment(data) {
+        $(".test").append(data);
+    }
     $(".commentbtn").click(function (event) {
         event.preventDefault();
         userId = event.target.dataset["user"];
@@ -20,7 +23,9 @@ $(document).ready(function () {
             },
             success: function (response) {
                 $("#cmntmodal").modal("hide");
+                comment(response[0].comment);
                 // alert("Comment Added");
+                // window.location.reload();
             },
             error: function (error) {
                 console.log(error);
@@ -39,8 +44,9 @@ $(document).ready(function () {
         userId = event.target.dataset["user"];
         taskId = event.target.dataset["task"];
         cmntId = event.target.dataset["comment"];
-        taskbody = $("#comment_tag").text();
-        $("#updatecomment").val(taskbody);
+        taskbody = event.target.previousElementSibling;
+        var cmntdata = taskbody.textContent;
+        $("#updatecomment").val(cmntdata);
         $("#cmntupmodal").modal("show");
     });
 
@@ -57,7 +63,8 @@ $(document).ready(function () {
             },
             success: function (response) {
                 $("#cmntupmodal").modal("hide");
-                alert("Comment updated");
+                window.location.reload();
+                // alert("Comment updated");
             },
             error: function (error) {
                 console.log(error);
