@@ -13,10 +13,19 @@
                             <p><span style="color: green">Title: </span>{{$tasks->title}}</p>
                             <p><span style="color: green">Description: </span>{{$tasks->description}}</p>
                             <p><span style="color: green">Deadline: </span>{{$tasks->due_date}}</p>
-                            <p><span style="color: green">Assigned To: </span>
+                            <p><span style="color: green">Assigned To: </span><br>
                                 @foreach ($tasks->users as $task)
+                                    @php
+                                        $len=count($tasks->users);
+                                        for ($i=0; $i<$len-1; $i++) {
+                                            echo $task->name."<br>";
+                                            // if ($i<($len-1)) {
+                                            //     echo ",";
+                                            // }
+                                        }
+                                    @endphp
                                     {{-- {{$task->name.","}} --}}
-                                    {{implode((array) $task->name,", ")}}
+                                    {{-- {{implode((array) $task->name,", ")}} --}}
                                 @endforeach
                                 {{-- @foreach ($task->users as $tasks_key=>$tasks_val)
                                     @php
@@ -46,7 +55,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <p style="margin: 0" id="comment_tag">{{$comment->comment}}</p>
                             @if ($comment->user_id===$user)
-                                <a data-task={{$task->id}} data-user={{$user}} data-comment={{$comment->id}} class="btn btn-sm btn-outline-info cmntupbtn">Edit</a>
+                                <a data-task={{$tasks->id}} data-user={{$user}} data-comment={{$comment->id}} class="btn btn-sm btn-outline-info cmntupbtn">Edit</a>
                             @endif
                         </div>
                         <hr>
