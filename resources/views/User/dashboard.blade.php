@@ -10,6 +10,7 @@
         <div class="row mt-5">
             <div class="col-md-12">
                 <a href="{{route('task.create')}}" class="btn btn-primary mt-5">New Task</a>
+                <a href="{{route('task.index')}}" class="btn btn-success mt-5">Assigned By Me</a>
             </div>
         </div>
         <div class="row g-2 mt-3 justify-content-start">

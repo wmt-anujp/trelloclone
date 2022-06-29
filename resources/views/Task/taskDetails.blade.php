@@ -10,19 +10,34 @@
                 <h3 class="text-center card-header">Task Details</h3>
                     <div class="row g-0">
                         <div class="col-12 px-4 mt-3">
-                            <p><span style="color: green">Title: </span>{{$task->title}}</p>
-                            <p><span style="color: green">Description: </span>{{$task->description}}</p>
-                            <p><span style="color: green">Deadline: </span>{{$task->due_date}}</p>
+                            <p><span style="color: green">Title: </span>{{$tasks->title}}</p>
+                            <p><span style="color: green">Description: </span>{{$tasks->description}}</p>
+                            <p><span style="color: green">Deadline: </span>{{$tasks->due_date}}</p>
                             <p><span style="color: green">Assigned To: </span>
-                                @foreach ($task->users as $tasks){{$tasks->name.", "}}@endforeach
+                                @foreach ($tasks->users as $task)
+                                    {{-- {{$task->name.","}} --}}
+                                    {{implode((array) $task->name,", ")}}
+                                @endforeach
+                                {{-- @foreach ($task->users as $tasks_key=>$tasks_val)
+                                    @php
+                                        // $count=count($tasks_val->name);
+                                        echo $tasks_val->name;
+                                        if ($tasks_key < ($tasks_key.length - 1)) {
+                                            echo ', ';
+                                        }
+                                    @endphp
+                                @endforeach --}}
                             </p>
                         </div>
                     </div>
             </div>
             <div>
-                <a data-task={{$task->id}} data-user={{$user}} class="btn btn-primary mt-2 commentbtn">Comment</a>
+                <a data-task={{$task->id}} data-user={{$user}} class="btn btn-primary mt-2 me-3 commentbtn">Comment</a>
+                @if ($tasks->assigned_by===$user)
+                    <a href="{{route('task.edit',['task'=>$tasks->id])}}" class="btn btn-success mt-2">Edit</a>
+                @endif
             </div>
-            <div class="mt-4">
+            <div class="mt-4 test">
                 <h4 style="color: green">All Comments</h4>
                 <hr>
                 @foreach ($comments as $comment)

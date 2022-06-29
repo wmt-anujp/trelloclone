@@ -19,7 +19,8 @@ class TaskController extends Controller
      */
     public function index()
     {
-        //
+        $task = Task::with('users')->get();
+        return view('Task.assignedother', ['task' => $task]);
     }
 
     /**
@@ -42,13 +43,12 @@ class TaskController extends Controller
     public function store(addTaskFormRequest $request)
     {
         try {
-            $task = Task::create([
+            Task::create([
                 'assigned_by' => Auth::guard('user')->user()->id,
                 'title' => $request->title,
                 'description' => $request->description,
                 'due_date' => $request->deadline,
-            ]);
-            $task->users()->attach($request->emp);
+            ])->users()->attach($request->emp);
             return redirect()->route('user.Dashboard')->with('success', 'Task Assigned Successfully');
         } catch (\Exception $exception) {
             dd($exception);
@@ -66,7 +66,7 @@ class TaskController extends Controller
     {
         $tasks = Task::with('users')->find($id);
         $comment = $tasks->comments;
-        return view('Task.taskDetails', ['task' => $tasks, 'user' => Auth::guard('user')->user()->id, 'comments' => $comment]);
+        return view('Task.taskDetails', ['tasks' => $tasks, 'user' => Auth::guard('user')->user()->id, 'comments' => $comment]);
     }
 
     public function newComment(Request $request)
@@ -75,12 +75,12 @@ class TaskController extends Controller
             if (!Auth::guard('user')->user()) {
                 return back();
             }
-            Comment::create([
+            $comments = Comment::create([
                 'user_id' => $request->userId,
                 'task_id' => $request->taskId,
                 'comment' => $request->comment,
             ]);
-            return redirect()->back()->with('success', 'Comment Added');
+            return response()->json([$comments]);
         } catch (\Exception $exception) {
             return redirect()->back()->with('error', 'Temporary Server Error.');
         }
@@ -95,7 +95,7 @@ class TaskController extends Controller
             Comment::where('id', $request->cmntId)->update([
                 'comment' => $request->comment,
             ]);
-            return redirect()->back()->with('success', 'Comment updated');
+            return response()->json(['success', 'Comment Updated']);
         } catch (\Exception $exception) {
             return redirect()->back()->with('error', 'Temporary Server Error.');
         }
@@ -107,9 +107,11 @@ class TaskController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
-        //
+        $task = Task::with('users')->find($id);
+        $user = User::where('id', '!=', Auth::guard('user')->id())->get();
+        return view('Task.updateTask', ['users' => $user, 'tasks' => $task]);
     }
 
     /**
@@ -121,7 +123,19 @@ class TaskController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        try {
+            $task_update = Task::where('id', $id)->first();
+            $task_update->update([
+                'title' => $request->title,
+                'description' => $request->description,
+                'due_date' => $request->deadline,
+            ]);
+            $task_update->users()->sync($request->emp);
+            return redirect()->route('task.index')->with('success', 'Task Updated');
+        } catch (\Exception $exception) {
+            dd($exception);
+            return redirect()->back()->with('error', 'Temporary Server Error.');
+        }
     }
 
     /**
