@@ -32,23 +32,25 @@
                     </div>
             </div>
             <div>
-                <a data-task={{$task->id}} data-user={{$user}} class="btn btn-primary mt-2 me-3 commentbtn">Comment</a>
+                <a data-task={{$tasks->id}} data-user={{$user}} class="btn btn-primary mt-2 me-3 commentbtn">Comment</a>
                 @if ($tasks->assigned_by===$user)
                     <a href="{{route('task.edit',['task'=>$tasks->id])}}" class="btn btn-success mt-2">Edit</a>
                 @endif
             </div>
-            <div class="mt-4 test">
+            <div class="mt-4">
                 <h4 style="color: green">All Comments</h4>
                 <hr>
                 @foreach ($comments as $comment)
-                    <p><span style="color: green">Commented By: </span>{{$comment->user->name}}</p>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <p style="margin: 0" id="comment_tag">{{$comment->comment}}</p>
-                        @if ($comment->user_id===Auth::guard('user')->user()->id)
-                            <a data-task={{$task->id}} data-user={{$user}} data-comment={{$comment->id}} class="btn btn-sm btn-outline-info cmntupbtn">Edit</a>
-                        @endif
+                    <div class="test">
+                        <p><span style="color: green">Commented By: </span>{{$comment->user->name}}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <p style="margin: 0" id="comment_tag">{{$comment->comment}}</p>
+                            @if ($comment->user_id===$user)
+                                <a data-task={{$task->id}} data-user={{$user}} data-comment={{$comment->id}} class="btn btn-sm btn-outline-info cmntupbtn">Edit</a>
+                            @endif
+                        </div>
+                        <hr>
                     </div>
-                    <hr>
                 @endforeach
             </div>
         </div>
