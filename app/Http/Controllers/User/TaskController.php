@@ -20,7 +20,7 @@ class TaskController extends Controller
     public function index()
     {
         $task = Task::with('users')->get();
-        return view('Task.assignedother', ['task' => $task]);
+        return view('Task.assignedOther', ['task' => $task]);
     }
 
     /**
@@ -136,6 +136,12 @@ class TaskController extends Controller
             dd($exception);
             return redirect()->back()->with('error', 'Temporary Server Error.');
         }
+    }
+
+    public function overDue()
+    {
+        $task = Task::with('users')->get();
+        return view('Task.overDueTasks', ['task' => $task]);
     }
 
     /**
