@@ -3,6 +3,17 @@ $(document).ready(function () {
         var re = new RegExp(regexp);
         return this.optional(element) || re.test(value);
     });
+    $.validator.addMethod("needsSelection", function (value, element) {
+        var count = $(element).find("option:selected").length;
+        return length > 0;
+    });
+    $("form").submit(function () {
+        var options = $("#emp > option:selected");
+        if (options.length == 0) {
+            ("Please select any one employee");
+            return false;
+        }
+    });
 
     // add task
     $("#addtask").validate({
@@ -15,9 +26,12 @@ $(document).ready(function () {
                 required: true,
                 maxlength: 800,
             },
-            "emp[]": {
-                required: true,
-            },
+            // "emp[]": {
+            //     needsSelection: true,
+            //     agree: "required",
+            //     required: true,
+            // },
+            "emp[]": "required",
             deadline: {
                 required: true,
             },
@@ -31,9 +45,12 @@ $(document).ready(function () {
                 required: "Please Enter Description",
                 maxlength: "Maximum 800 characters are allowed",
             },
-            "emp[]": {
-                required: "Please Select any one employee",
-            },
+            // "emp[]": {
+            //     needsSelection: "Select any one",
+            //     agree: "",
+            //     required: "Please Select any one employee",
+            // },
+            "emp[]": "please select",
             deadline: {
                 required: "Please select the due date",
             },
