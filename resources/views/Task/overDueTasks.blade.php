@@ -7,11 +7,13 @@
     <div class="row g-2 mt-3 justify-content-start">
         <h3 style="color: red" class="mt-5">Over Due Tasks</h3>
         @foreach ($task as $tasks)
-            @if ($tasks->due_date===Carbon\Carbon::now()->toDateString())
-                <div class="col-12 col-md-2">
-                    <a class="btn btn-sm btn-success" href="{{route('task.show',['task'=>$tasks->id])}}">{{$tasks->title}}</a>
-                </div>
-            @endif
+            @foreach ($tasks->users as $taskuser)
+                @if($taskuser->id===Auth::guard('user')->user()->id && Carbon\Carbon::now()->toDateString()>$tasks->due_date)
+                    <div class="col-12 col-md-2">
+                        <a class="btn btn-sm btn-success" href="{{route('task.show',['task'=>$tasks->id])}}">{{$tasks->title}}</a>
+                    </div>
+                @endif
+            @endforeach
         @endforeach
     </div>
 </div>

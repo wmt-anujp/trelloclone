@@ -18,7 +18,7 @@
             <h3 style="color: green">Tasks assigned to Me</h3>
             @foreach ($tasks as $task)
                 @foreach ($task->users as $tasksuser)
-                    @if ($tasksuser->pivot->user_id===Auth::guard('user')->user()->id && $task->due_date!==Carbon\Carbon::now()->toDateString())
+                    @if ($tasksuser->pivot->user_id===Auth::guard('user')->user()->id && $task->due_date>=Carbon\Carbon::now()->toDateString())
                         <div class="col-12 col-md-2">
                             <a class="btn btn-sm btn-success" href="{{route('task.show',['task'=>$task->id])}}">{{$task->title}}</a>
                         </div>

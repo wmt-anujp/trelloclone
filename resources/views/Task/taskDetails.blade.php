@@ -21,46 +21,14 @@
                                     }
                                     echo implode(', ',$out);
                                 @endphp
-                                {{-- @foreach ($tasks->users as $task) --}}
-                                    {{-- @php
-                                        $len=count($tasks->users);
-                                        $str="";
-                                        for ($f=0; $f<$len-1; $f++) {
-                                            if($f===$len){
-                                                $str.= $task->name;
-                                            }
-                                            else {
-                                                $str.= $task->name.',';
-                                            }
-                                            // if ($i<($len-1)) {
-                                            //     echo ",";
-                                            // }
-                                        }
-                                        // $str = trim($str, ",");
-                                        echo $str;
-                                    @endphp --}}
-                                    {{-- {{$task->name.","}} --}}
-                                    {{-- {{implode((array) $task->name,", ")}} --}}
-                                {{-- @endforeach --}}
-                                {{-- @foreach ($tasks->users as $task)
-                                    @php
-                                        $len=count($tasks->users);
-                                        for ($i=0; $i<$len-1; $i++) {
-                                            echo $task->name;
-                                            if ($i<($len-1)) {
-                                                echo ",";
-                                            }
-                                        }
-                                    @endphp
-                                    {{-- {{$task->name.","}} --}}
-                                    {{-- {{implode((array) $task->name,", ")}} --}}
-                                {{-- @endforeach --}}
                             </p>
                         </div>
                     </div>
             </div>
             <div>
-                @if ($tasks->due_date!==Carbon\Carbon::now()->toDateString())
+                {{-- @if ($tasks->due_date!==Carbon\Carbon::now()->toDateString()) --}}
+                {{-- {{dd($tasks->users)}} --}}
+                @if (Carbon\Carbon::now()->toDateString()<=$tasks->due_date)
                     <a data-task={{$tasks->id}} data-user={{$user}} class="btn btn-primary mt-2 me-3 commentbtn">Comment</a>
                 @endif
                 @if ($tasks->assigned_by===$user)
@@ -75,7 +43,7 @@
                         <p><span style="color: green">Commented By: </span>{{$comment->user->name}}</p>
                         <div class="d-flex justify-content-between align-items-center web">
                             <p style="margin: 0" id="comment_tag">{{$comment->comment}}</p>
-                            @if ($comment->user_id===$user && $tasks->due_date!==Carbon\Carbon::now()->toDateString())
+                            @if (Carbon\Carbon::now()->toDateString()<=$tasks->due_date && $comment->user_id===$user)
                                 <a data-task={{$tasks->id}} data-user={{$user}} data-comment={{$comment->id}} class="btn btn-sm btn-outline-info cmntupbtn">Edit</a>
                             @endif
                         </div>
