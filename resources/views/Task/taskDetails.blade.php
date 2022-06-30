@@ -27,7 +27,6 @@
             </div>
             <div>
                 {{-- @if ($tasks->due_date!==Carbon\Carbon::now()->toDateString()) --}}
-                {{-- {{dd($tasks->users)}} --}}
                 @if (Carbon\Carbon::now()->toDateString()<=$tasks->due_date)
                     <a data-task={{$tasks->id}} data-user={{$user}} class="btn btn-primary mt-2 me-3 commentbtn">Comment</a>
                 @endif

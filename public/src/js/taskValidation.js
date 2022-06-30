@@ -15,7 +15,7 @@ $(document).ready(function () {
                 required: true,
                 maxlength: 800,
             },
-            emp: {
+            "emp[]": {
                 required: true,
             },
             deadline: {
@@ -31,7 +31,7 @@ $(document).ready(function () {
                 required: "Please Enter Description",
                 maxlength: "Maximum 800 characters are allowed",
             },
-            emp: {
+            "emp[]": {
                 required: "Please Select any one employee",
             },
             deadline: {

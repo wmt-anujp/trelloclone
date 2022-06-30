@@ -11,11 +11,7 @@
                 <ul class="navbar-nav ms-auto me-5 mb-2 mb-lg-0">
                     @if (Auth::guard('user')->check())
                         <li class="nav-item me-4">
-                            <a href="{{route('user.Dashboard')}}" class="btn">Dashboard</a>
-                        </li>
-                        <li class="nav-item me-4">
-                        </li>
-                        <li class="nav-item me-4">
+                            <a href="{{route('user.Dashboard')}}" class="btn">{{(Auth::guard('user')->user()->name)}}'s Dashboard</a>
                         </li>
                     @endif
                         <li class="nav-item me-4">

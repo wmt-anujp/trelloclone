@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Task\addTaskFormRequest;
+use App\Http\Requests\Task\updateTaskFormRequest;
 use App\Models\Comment;
 use App\Models\Task;
 use App\Models\User;
@@ -65,7 +66,7 @@ class TaskController extends Controller
     public function show($id)
     {
         $tasks = Task::with('users')->find($id);
-        $comment = $tasks->comments;
+        $comment = Comment::where('task_id', $id)->orderBy('created_at', 'desc')->get();
         return view('Task.taskDetails', ['tasks' => $tasks, 'user' => Auth::guard('user')->user()->id, 'comments' => $comment]);
     }
 
@@ -121,7 +122,7 @@ class TaskController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(updateTaskFormRequest $request, $id)
     {
         try {
             $task_update = Task::where('id', $id)->first();

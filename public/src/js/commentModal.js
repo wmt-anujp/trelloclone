@@ -23,7 +23,7 @@ $(document).ready(function () {
             },
             success: function (response) {
                 $("#cmntmodal").modal("hide");
-                $(".test").append(response.comment);
+                $(".test").prepend(response.comment);
                 // comment($(".test"));
                 // alert("Comment Added");
                 // window.location.reload();
