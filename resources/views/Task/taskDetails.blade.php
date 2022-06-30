@@ -69,8 +69,8 @@
             </div>
             <div class="mt-4">
                 <h4 style="color: green">All Comments</h4>
-                <hr>
                 <div class="test">
+                <hr>
                     @foreach ($comments as $comment)
                         <p><span style="color: green">Commented By: </span>{{$comment->user->name}}</p>
                         <div class="d-flex justify-content-between align-items-center web">
