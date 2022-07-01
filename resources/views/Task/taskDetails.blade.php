@@ -110,28 +110,30 @@
         var urlComment="{{route('add.Comment')}}";
         var urlUpdateComment="{{route('update.Comment')}}";
     </script>
-    {{-- <script src="{{URL::to('src/js/commentModal.js')}}"></script> --}}
+    <script src="{{URL::to('src/js/commentModal.js')}}"></script>
     <script>
-        var d= new Date().toLocaleDateString().split('/').reverse().join("-");
+        var currentDate= new Date().toLocaleDateString().split('/').reverse().join("-");
         let task = {!! json_encode($tasks, JSON_HEX_TAG) !!};
         function getComment(){
             $.ajax({
                 method: "get",
                 url: '{{ route('get.comment',':id')}}'.replace(':id', task?.id),
                 success: function (response) {
+                    // console.log(response.users);
                     let data = '';
-                    response?.map(e => 
-                        data += '<div>'+
-                            '<p><span style="color: green">Commented By: </span>'+e.user.name+'</p>'+'<div class="d-flex justify-content-between align-items-center">'+'<p style="margin: 0" id="comment_tag">'+e.comment+'</p>'+if (e.task.due_date>=d) {
-                                
-                            }'<a class="btn btn-sm btn-outline-info cmntupbtn">Edit</a>'+'</div><hr>',
+                    response?.comment?.map(e => 
+                        data += '<div>'
+                            +'<p><span style="color: green">Commented By: </span>'
+                            +e.user.name
+                            +'</p>'
+                            +'<div class="d-flex justify-content-between align-items-center">'
+                            +'<p style="margin: 0" id="comment_tag">'
+                            +e.comment+response.users.email
+                            +'</p>'
+                            +(currentDate<=e.task.due_date?"<a class='btn btn-sm btn-outline-info cmntupbtn'>Edit</a>":"panchal")
+                            +'</div><hr>',
                     );
                     $('.test').html(data);
-                    function temp(){
-                        if (response) {
-                            
-                        }
-                    }
                     console.log(response);
                 },
                 error: function (error) {

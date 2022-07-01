@@ -63,9 +63,9 @@ class TaskController extends Controller
      */
     public function getComment($id)
     {
-        // $comment = Comment::where('task_id', $id)->orderBy('created_at', 'desc')->get();
+        $user = Auth::guard('user')->user();
         $comment = Comment::where('task_id', $id)->with(['user', 'task'])->orderBy('created_at', 'desc')->get();
-        return response()->json($comment);
+        return response()->json(['comment' => $comment, 'users' => $user]);
     }
 
     /**

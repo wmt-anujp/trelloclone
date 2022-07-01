@@ -3,6 +3,7 @@
 use App\Http\Controllers\User\TaskController;
 use App\Http\Controllers\User\Auth\UserController;
 use Illuminate\Support\Facades\Route;
+use PhpOption\Some;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,6 +21,11 @@ Route::resource('task', TaskController::class);
 Route::namespace('User')->middleware('backbutton')->group(function () {
     Route::namespace('Auth')->middleware('guest')->group(function () {
         Route::get('/', function () {
+            // $obj = [
+            //     'name' => 'anuj',
+            //     'email' => 'anuj@gmail.com'
+            // ];
+            // dd($obj);
             return view('User.login');
         })->name('user.Login');
         Route::post('user-login', [UserController::class, 'userLogin'])->name('user.Logins');
