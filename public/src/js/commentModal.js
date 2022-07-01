@@ -10,6 +10,26 @@ $(document).ready(function () {
         taskId = event.target.dataset["task"];
         $("#cmntmodal").modal("show");
     });
+    var assign =
+        "@foreach($comments as $comment)" +
+        "<p><span style='color: green'>Commented By: </span>" +
+        "{{ $comment->user->name }}" +
+        "</p>" +
+        "<div class='d-flex justify-content-between align-items-center web'>" +
+        "<p style='margin: 0' id='comment_tag'>" +
+        "{{$comment->comment}}" +
+        "</p>" +
+        "@if ($comment->user_id===$user)" +
+        "<a data-task=" +
+        "{{$tasks->id}}" +
+        "data-user=" +
+        "{{$user}}" +
+        "data-comment=" +
+        "{{$comment->id}}" +
+        "class='btn btn-sm btn-outline-info cmntupbtn'>Edit</a>" +
+        "@endif" +
+        "</div>" +
+        "@endforeach";
 
     $("#modalsave").click(function () {
         $.ajax({
@@ -23,9 +43,6 @@ $(document).ready(function () {
             },
             success: function (response) {
                 $("#cmntmodal").modal("hide");
-                $(".test").prepend(response.comment);
-                // console.log(response);
-                // $(".test").prepend(response);
                 // $(".web").html(response);
                 // comment($(".test"));
                 // alert("Comment Added");

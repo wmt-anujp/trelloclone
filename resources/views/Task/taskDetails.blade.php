@@ -26,25 +26,27 @@
                     </div>
             </div>
             <div>
-                <a data-task={{$tasks->id}} data-user={{$user}} class="btn btn-primary mt-2 me-3 commentbtn">Comment</a>
+                @if ($tasks->due_date>=Carbon\Carbon::now()->toDateString())
+                    <a data-task={{$tasks->id}} data-user={{$user}} class="btn btn-primary mt-2 me-3 commentbtn">Comment</a>
+                @endif
                 @if ($tasks->assigned_by===$user)
                     <a href="{{route('task.edit',['task'=>$tasks->id])}}" class="btn btn-success mt-2">Edit</a>
                 @endif
             </div>
             <div class="mt-4">
-                <h4 style="color: green">All Comments</h4>
-                <div class="test">
+                <h4 style="color: #008000">All Comments</h4>
                 <hr>
-                    @foreach ($comments as $comment)
+                <div class="test">
+                    {{-- @foreach ($comments as $comment)
                         <p><span style="color: green">Commented By: </span>{{$comment->user->name}}</p>
                         <div class="d-flex justify-content-between align-items-center web">
                             <p style="margin: 0" id="comment_tag">{{$comment->comment}}</p>
-                            @if ($comment->user_id===$user)
+                            @if (Carbon\Carbon::now()->toDateString()<=$tasks->due_date && $comment->user_id===$user)
                                 <a data-task={{$tasks->id}} data-user={{$user}} data-comment={{$comment->id}} class="btn btn-sm btn-outline-info cmntupbtn">Edit</a>
                             @endif
                         </div>
-                        <hr>
                     @endforeach
+                    <hr> --}}
                 </div>
             </div>
         </div>
@@ -108,5 +110,38 @@
         var urlComment="{{route('add.Comment')}}";
         var urlUpdateComment="{{route('update.Comment')}}";
     </script>
-    <script src="{{URL::to('src/js/commentModal.js')}}"></script>
+    {{-- <script src="{{URL::to('src/js/commentModal.js')}}"></script> --}}
+    <script>
+        var d= new Date().toLocaleDateString().split('/').reverse().join("-");
+        let task = {!! json_encode($tasks, JSON_HEX_TAG) !!};
+        function getComment(){
+            $.ajax({
+                method: "get",
+                url: '{{ route('get.comment',':id')}}'.replace(':id', task?.id),
+                success: function (response) {
+                    let data = '';
+                    response?.map(e => 
+                        data += '<div>'+
+                            '<p><span style="color: green">Commented By: </span>'+e.user.name+'</p>'+'<div class="d-flex justify-content-between align-items-center">'+'<p style="margin: 0" id="comment_tag">'+e.comment+'</p>'+if (e.task.due_date>=d) {
+                                
+                            }'<a class="btn btn-sm btn-outline-info cmntupbtn">Edit</a>'+'</div><hr>',
+                    );
+                    $('.test').html(data);
+                    function temp(){
+                        if (response) {
+                            
+                        }
+                    }
+                    console.log(response);
+                },
+                error: function (error) {
+                    console.log(error);
+                },
+            });
+        }
+        getComment();
+        function addComment(){
+
+        }
+    </script> 
 @endsection

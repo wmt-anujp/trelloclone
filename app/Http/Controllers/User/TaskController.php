@@ -59,6 +59,16 @@ class TaskController extends Controller
     }
 
     /**
+     * Get Comment
+     */
+    public function getComment($id)
+    {
+        // $comment = Comment::where('task_id', $id)->orderBy('created_at', 'desc')->get();
+        $comment = Comment::where('task_id', $id)->with(['user', 'task'])->orderBy('created_at', 'desc')->get();
+        return response()->json($comment);
+    }
+
+    /**
      * Display the specified resource.
      *
      * @param  int  $id
@@ -67,23 +77,25 @@ class TaskController extends Controller
     public function show($id)
     {
         $tasks = Task::with('users')->find($id);
-        $comment = Comment::where('task_id', $id)->whereHas('task', function ($q) {
-            return $q->where('due_date', '>=', Carbon::now()->toDateString());
-        })->orderBy('created_at', 'desc')->get();
+        $comment = Comment::where('task_id', $id)->orderBy('created_at', 'desc')->get();
+
+        // $comment = Comment::where('task_id', $id)->whereHas('task', function ($q) {
+        //     return $q->where('due_date', '>=', Carbon::now()->toDateString());
+        // })->orderBy('created_at', 'desc')->get();
+
         return view('Task.taskDetails', ['tasks' => $tasks, 'user' => Auth::guard('user')->user()->id, 'comments' => $comment]);
     }
 
     public function newComment(Request $request)
     {
         try {
-            $comments = Comment::create([
+            Comment::create([
                 'user_id' => $request->userId,
                 'task_id' => $request->taskId,
                 'comment' => $request->comment,
             ]);
-            $comments = Comment::where(['task_id' => $request->taskId, 'user_id' => $request->userId])->orderBy('created_at', 'desc')->get();
-            // $new_comment = view('Task.taskDetails', compact('comment'))->render();
-            return response()->json($comments);
+            // $comments = Comment::where([['task_id', $request->taskId], ['user_id', $request->userId]])->orderBy('created_at', 'desc')->get();
+            return response()->json('success');
         } catch (\Exception $exception) {
             return redirect()->back()->with('error', 'Temporary Server Error.');
         }

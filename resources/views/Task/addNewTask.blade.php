@@ -26,7 +26,7 @@
 
             <div class="form-group mb-4">
                 <label for="emp">Select Employees</label>
-                <select name="empl[]" id="emp" placeholder="Select Employees" multiple>
+                <select name="emp[]" id="emp" placeholder="Select Employees" multiple>
                     @foreach ($users as $user)
                         <option value="{{$user->id}}">{{$user->name}}</option>
                     @endforeach

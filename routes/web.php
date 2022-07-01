@@ -30,5 +30,6 @@ Route::namespace('User')->middleware('backbutton')->group(function () {
         Route::post('comment', [TaskController::class, 'newComment'])->name('add.Comment');
         Route::post('update-comment', [TaskController::class, 'updateComment'])->name('update.Comment');
         Route::get('overdue', [TaskController::class, 'overDue'])->name('task.Overdue');
+        Route::get('/get-comment/{id}', [TaskController::class, 'getComment'])->name('get.comment');
     });
 });

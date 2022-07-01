@@ -31,7 +31,7 @@ $(document).ready(function () {
             //     agree: "required",
             //     required: true,
             // },
-            "emp[]": "required",
+            "emp[]": { required: true },
             deadline: {
                 required: true,
             },
