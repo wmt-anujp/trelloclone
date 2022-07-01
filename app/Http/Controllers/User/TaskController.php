@@ -81,6 +81,8 @@ class TaskController extends Controller
                 'task_id' => $request->taskId,
                 'comment' => $request->comment,
             ]);
+            $comments = Comment::where(['task_id' => $request->taskId, 'user_id' => $request->userId])->orderBy('created_at', 'desc')->get();
+            // $new_comment = view('Task.taskDetails', compact('comment'))->render();
             return response()->json($comments);
         } catch (\Exception $exception) {
             return redirect()->back()->with('error', 'Temporary Server Error.');
