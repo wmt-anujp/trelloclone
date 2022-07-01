@@ -9,6 +9,7 @@ use App\Models\Comment;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class TaskController extends Controller
@@ -66,16 +67,15 @@ class TaskController extends Controller
     public function show($id)
     {
         $tasks = Task::with('users')->find($id);
-        $comment = Comment::where('task_id', $id)->orderBy('created_at', 'desc')->get();
+        $comment = Comment::where('task_id', $id)->whereHas('task', function ($q) {
+            return $q->where('due_date', '>=', Carbon::now()->toDateString());
+        })->orderBy('created_at', 'desc')->get();
         return view('Task.taskDetails', ['tasks' => $tasks, 'user' => Auth::guard('user')->user()->id, 'comments' => $comment]);
     }
 
     public function newComment(Request $request)
     {
         try {
-            if (!Auth::guard('user')->user()) {
-                return back();
-            }
             $comments = Comment::create([
                 'user_id' => $request->userId,
                 'task_id' => $request->taskId,
@@ -92,9 +92,6 @@ class TaskController extends Controller
     public function updateComment(Request $request)
     {
         try {
-            if (!Auth::guard('user')->user()) {
-                return back();
-            }
             Comment::where('id', $request->cmntId)->update([
                 'comment' => $request->comment,
             ]);
@@ -143,7 +140,8 @@ class TaskController extends Controller
 
     public function overDue()
     {
-        $task = Task::with('users')->get();
+        // dd(Carbon::now()->toDateString());
+        $task = Task::where('due_date', '<', Carbon::now()->toDateString())->with('users')->get();
         return view('Task.overDueTasks', ['task' => $task]);
     }
 

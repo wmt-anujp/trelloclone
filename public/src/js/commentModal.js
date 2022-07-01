@@ -24,6 +24,9 @@ $(document).ready(function () {
             success: function (response) {
                 $("#cmntmodal").modal("hide");
                 $(".test").prepend(response.comment);
+                // console.log(response);
+                // $(".test").prepend(response);
+                // $(".web").html(response);
                 // comment($(".test"));
                 // alert("Comment Added");
                 // window.location.reload();

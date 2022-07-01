@@ -7,6 +7,7 @@ use App\Http\Requests\User\userLoginFormRequest;
 use App\Http\Requests\User\userSignupFormRequest;
 use App\Models\Task;
 use App\Models\User;
+use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -35,7 +36,7 @@ class UserController extends Controller
 
     public function userDashboard()
     {
-        $tasks = Task::with('users')->get();
+        $tasks = Task::where('due_date', '>=', Carbon::now()->toDateString())->with('users')->get();
         return view('User.dashboard', ['tasks' => $tasks]);
     }
     /**

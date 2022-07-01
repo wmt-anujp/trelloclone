@@ -9,7 +9,7 @@
             @foreach ($task as $tasks)
                 @if ($tasks->assigned_by===Auth::guard('user')->user()->id)
                     <div class="col-12 col-md-2">
-                        <a class="btn btn-sm btn-success" href="{{route('task.show',['task'=>$tasks->id])}}">{{$tasks->title}}</a>
+                        <a class="btn btn-sm btn-primary" href="{{route('task.show',['task'=>$tasks->id])}}">{{$tasks->title}}</a>
                     </div>
                 @endif
             @endforeach

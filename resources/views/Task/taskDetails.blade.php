@@ -26,10 +26,7 @@
                     </div>
             </div>
             <div>
-                {{-- @if ($tasks->due_date!==Carbon\Carbon::now()->toDateString()) --}}
-                @if (Carbon\Carbon::now()->toDateString()<=$tasks->due_date)
-                    <a data-task={{$tasks->id}} data-user={{$user}} class="btn btn-primary mt-2 me-3 commentbtn">Comment</a>
-                @endif
+                <a data-task={{$tasks->id}} data-user={{$user}} class="btn btn-primary mt-2 me-3 commentbtn">Comment</a>
                 @if ($tasks->assigned_by===$user)
                     <a href="{{route('task.edit',['task'=>$tasks->id])}}" class="btn btn-success mt-2">Edit</a>
                 @endif
@@ -42,7 +39,7 @@
                         <p><span style="color: green">Commented By: </span>{{$comment->user->name}}</p>
                         <div class="d-flex justify-content-between align-items-center web">
                             <p style="margin: 0" id="comment_tag">{{$comment->comment}}</p>
-                            @if (Carbon\Carbon::now()->toDateString()<=$tasks->due_date && $comment->user_id===$user)
+                            @if ($comment->user_id===$user)
                                 <a data-task={{$tasks->id}} data-user={{$user}} data-comment={{$comment->id}} class="btn btn-sm btn-outline-info cmntupbtn">Edit</a>
                             @endif
                         </div>
