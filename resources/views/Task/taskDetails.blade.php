@@ -79,7 +79,7 @@
 {{-- comment modal ends --}}
 
 {{-- comment update starts --}}
-<div class="modal fade" tabindex="-1" id="cmntupmodal">
+<div class="modal fade" tabindex="-1" id="commentupdatemodal">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
@@ -109,17 +109,14 @@
         var token="{{csrf_token()}}";
         var urlComment="{{route('add.Comment')}}";
         var urlUpdateComment="{{route('update.Comment')}}";
-    </script>
-    <script src="{{URL::to('src/js/commentModal.js')}}"></script>
-    <script>
-        var currentDate= new Date().toLocaleDateString().split('/').reverse().join("-");
+        // var currentDate= new Date().toLocaleDateString().split('/').reverse().join("-");
+        var currentDate= new Date().toISOString().slice(0, 10);
         let task = {!! json_encode($tasks, JSON_HEX_TAG) !!};
         function getComment(){
             $.ajax({
                 method: "get",
                 url: '{{ route('get.comment',':id')}}'.replace(':id', task?.id),
                 success: function (response) {
-                    // console.log(response.users);
                     let data = '';
                     response?.comment?.map(e => 
                         data += '<div>'
@@ -128,13 +125,12 @@
                             +'</p>'
                             +'<div class="d-flex justify-content-between align-items-center">'
                             +'<p style="margin: 0" id="comment_tag">'
-                            +e.comment+response.users.email
+                            +e.comment
                             +'</p>'
-                            +(currentDate<=e.task.due_date?"<a class='btn btn-sm btn-outline-info cmntupbtn'>Edit</a>":"panchal")
+                            +(currentDate<=e.task.due_date && e.user_id===response.users.id?"<a class='btn btn-sm btn-outline-warning commentupdatebtn' data-comment="+e.id+" data-task="+e.task.id+" data-user="+response.users.id+" onclick=updateComment()>Edit</a>":"")
                             +'</div><hr>',
                     );
                     $('.test').html(data);
-                    console.log(response);
                 },
                 error: function (error) {
                     console.log(error);
@@ -145,5 +141,40 @@
         function addComment(){
 
         }
-    </script> 
+        function updateComment(){
+            $(".commentupdatebtn").click(function (event) {
+                event.preventDefault();
+                userId = event.target.dataset["user"];
+                taskId = event.target.dataset["task"];
+                cmntId = event.target.dataset["comment"];
+                taskbody = event.target.previousElementSibling;
+                var cmntdata = taskbody.textContent;
+                $("#updatecomment").val(cmntdata);
+                $("#commentupdatemodal").modal("show");
+            });
+            $("#modalsavee").click(function () {
+                $.ajax({
+                    method: "POST",
+                    url: urlUpdateComment,
+                    data: {
+                        userId: userId,
+                        taskId: taskId,
+                        cmntId: cmntId,
+                        comment: $("#updatecomment").val(),
+                        _token: token,
+                    },
+                    success: function (response) {
+                        getComment();
+                        $("#commentupdatemodal").modal("hide");
+                        // alert("Comment updated");
+                    },
+                    error: function (error) {
+                        console.log(error);
+                        alert("Comment not updated");
+                    },
+                });
+            });
+        }
+    </script>
+    <script src="{{URL::to('src/js/commentModal.js')}}"></script>
 @endsection

@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
 
 class TaskController extends Controller
 {
-    
+
     /**
      * Display a listing of the resource.
      *
@@ -79,7 +79,7 @@ class TaskController extends Controller
     {
         $tasks = Task::with('users')->find($id);
         $comment = Comment::where('task_id', $id)->orderBy('created_at', 'desc')->get();
-
+        // just for reference👇👇
         // $comment = Comment::where('task_id', $id)->whereHas('task', function ($q) {
         //     return $q->where('due_date', '>=', Carbon::now()->toDateString());
         // })->orderBy('created_at', 'desc')->get();
@@ -95,7 +95,6 @@ class TaskController extends Controller
                 'task_id' => $request->taskId,
                 'comment' => $request->comment,
             ]);
-            // $comments = Comment::where([['task_id', $request->taskId], ['user_id', $request->userId]])->orderBy('created_at', 'desc')->get();
             return response()->json('success');
         } catch (\Exception $exception) {
             return redirect()->back()->with('error', 'Temporary Server Error.');
