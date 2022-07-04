@@ -16,10 +16,9 @@ use PhpOption\Some;
 |
 */
 
-Route::resource('user', UserController::class);
-Route::resource('task', TaskController::class);
 Route::namespace('User')->middleware('backbutton')->group(function () {
     Route::namespace('Auth')->middleware('guest')->group(function () {
+        Route::resource('user', 'UserController');
         Route::get('/', function () {
             // $obj = [
             //     'name' => 'anuj',
@@ -37,5 +36,6 @@ Route::namespace('User')->middleware('backbutton')->group(function () {
         Route::post('update-comment', [TaskController::class, 'updateComment'])->name('update.Comment');
         Route::get('overdue', [TaskController::class, 'overDue'])->name('task.Overdue');
         Route::get('/get-comment/{id}', [TaskController::class, 'getComment'])->name('get.comment');
+        Route::resource('task', 'TaskController');
     });
 });
