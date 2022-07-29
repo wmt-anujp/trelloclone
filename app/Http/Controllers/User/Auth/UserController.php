@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\User\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\ForgotPasswordRequest;
+use App\Http\Requests\User\NewPasswordRequest;
 use App\Http\Requests\User\userLoginFormRequest;
 use App\Http\Requests\User\userSignupFormRequest;
 use App\Models\Task;
@@ -19,6 +21,135 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    // public function __construct()
+    // {
+    //     $this->middleware('auth:api', ['except' => ['login', 'userLogin', 'forgotPassword', 'verifyOTP', 'setPassword']]);
+    // }
+
+    public function login()
+    {
+        // $user = User::first();
+        // $token = auth()->login($user);
+        // dd($user);
+        $credentials = request(['email', 'password']);
+        $anuj = Auth::guard('api')->attempt($credentials);
+        dd($anuj);
+        if (!$anuj) {
+            return response()->json(['error' => 'Please Check Credentials'], 401);
+        }
+        // return $this->respondWithToken($anuj);
+    }
+
+    public function userLogin(userLoginFormRequest $request)
+    {
+        try {
+            // dd(Auth::user());
+            if ($some = Auth::guard('api')->attempt($request->only('email', 'password'))) {
+                // return $this->respondWithToken($some);
+                return response()->json(['success' => 'Login Successful', $this->respondWithToken($some)], 200);
+                // return redirect()->route('user.Dashboard')->with('success', 'Login Successfull');
+            } else {
+                // return redirect()->back()->with('error', 'Please Check Credentials');
+                return response()->json(['error' => 'Please Check Credentials'], 401);
+            }
+            return $this->respondWithToken($some);
+        } catch (\Exception $exception) {
+            dd($exception);
+            return redirect()->back()->with('error', 'Temporary Server error');
+        }
+    }
+
+    public function me()
+    {
+        return response()->json(auth()->user());
+    }
+
+    public function logout()
+    {
+        auth()->logout(true);
+        return response()->json(['message' => 'Successfully logged out']);
+    }
+
+    public function refresh()
+    {
+        $newToken = auth()->refresh();
+        return $this->respondWithToken(auth()->refresh());
+        $newToken = auth()->refresh(true, true);
+    }
+
+    protected function respondWithToken($token)
+    {
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth()->factory()->getTTL() * 60
+        ]);
+    }
+
+    public function forgotPassword(ForgotPasswordRequest $request)
+    {
+        $email = $request->validated();
+        try {
+            $user = User::where('email', $email['email'])->first();
+            if (!isset($user)) {
+                return response()->json(['error' => 'Please enter registered email address']);
+            }
+            $digits = 4;
+            $otp = rand(pow(10, $digits - 1), pow(10, $digits) - 1);
+            $currentDateTime = Carbon::now()->addMinutes(5)->format('Y-m-d H:i:m');
+            $user->update([
+                'otp' => $otp,
+                'otp_created_at' => $currentDateTime
+            ]);
+            return response()->json(['success' => 'OTP has been sent on entered email address']);
+        } catch (\Exception $exception) {
+            // dd($exception);
+            return response()->json(['error' => 'Something Went Wrong'], 401);
+        }
+    }
+
+    public function verifyOTP(Request $request)
+    {
+        try {
+            $storedOTP = User::where('email', $request->email)->first();
+            $enteredOTP = $request->otp;
+            if ($storedOTP->otp_created_at < Carbon::now()->format('Y-m-d H:i:m')) {
+                return response()->json(['error' => 'OTP has expired! Please generate new OTP']);
+            } elseif ($storedOTP->otp == $enteredOTP) {
+                return response()->json(['success' => 'OTP Verification Successful']);
+            } else {
+                return response()->json(['error' => 'Please Enter correct OTP']);
+            }
+        } catch (\Exception $exception) {
+            return response()->json(['error' => 'Something went wrong'], 401);
+        }
+    }
+
+    public function setPassword(NewPasswordRequest $request)
+    {
+        try {
+            $validated = $request->validated();
+            $user = User::where('email', $validated['email'])->first();
+            $user->update([
+                'password' => Hash::make($validated['password']),
+            ]);
+            return response()->json(['success', 'New Password has been successfully set'], 200);
+        } catch (\Exception $exception) {
+            return response()->json(['error' => 'Something went wrong'], 401);
+        }
+    }
+
+    public function getDashboard(Request $request)
+    {
+        $dashboardData = $request->all();
+        return response()->json([
+            'inprogress' => $dashboardData['inprogress'],
+            'completed' => $dashboardData['completed'],
+            'manual_completion' => $dashboardData['manual_completion'],
+            'automatic_completion' => $dashboardData['automatic_completion']
+        ]);
+    }
+
     public function index()
     {
         return view('User.signup');
@@ -48,28 +179,18 @@ class UserController extends Controller
     public function store(userSignupFormRequest $request)
     {
         try {
+            $validatedData = $request->validated();
+            dd($validatedData);
             $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
+                'name' => $validatedData['name'],
+                'email' => $validatedData['email'],
+                'password' => Hash::make($validatedData['password']),
             ]);
-            Auth::guard('user')->login($user);
-            return redirect()->route('user.Dashboard')->with('success', 'SignUp Successfull');
+            return response()->json(['success' => 'User Registration Successfull'], 200);
+            // Auth::guard('user')->login($user);
+            // return redirect()->route('user.Dashboard')->with('success', 'SignUp Successfull');
         } catch (\Exception $exception) {
             return redirect()->back()->with('error', 'Temporary Server Error.');
-        }
-    }
-
-    public function userLogin(userLoginFormRequest $request)
-    {
-        try {
-            if (Auth::guard('user')->attempt($request->only('email', 'password'))) {
-                return redirect()->route('user.Dashboard')->with('success', 'Login Successfull');
-            } else {
-                return redirect()->back()->with('error', 'Please Check Credentials');
-            }
-        } catch (\Exception $exception) {
-            return redirect()->back()->with('error', 'Temporary Server error');
         }
     }
 
