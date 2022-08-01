@@ -15,20 +15,16 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
 Route::resource('user', 'UserController');
 Route::group(['middleware' => 'api'], function ($router) {
     Route::post('login', [UserController::class, 'userLogin']);
     Route::post('logout', [UserController::class, 'logout']);
     Route::post('refresh', [UserController::class, 'refresh']);
     Route::post('me', [UserController::class, 'me']);
-});
-Route::post('forgot-password', [UserController::class, 'forgotPassword']);
-Route::post('verify-otp', [UserController::class, 'verifyOTP']);
-Route::post('set-password', [UserController::class, 'setPassword']);
-
-Route::middleware('api')->group(function () {
-    Route::get('dashboard', [UserController::class, 'getDashboard']);
+    Route::post('forgot-password', [UserController::class, 'forgotPassword']);
+    Route::post('verify-otp', [UserController::class, 'verifyOTP']);
+    Route::post('set-password', [UserController::class, 'setPassword']);
+    Route::get('job-completion', [UserController::class, 'jobCompletion']);
+    Route::get('violation-reported', [UserController::class, 'violationReported']);
+    Route::get('associate-detail', [UserController::class, 'associateDetail']);
 });

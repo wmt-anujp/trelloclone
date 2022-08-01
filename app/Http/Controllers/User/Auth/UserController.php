@@ -9,13 +9,16 @@ use App\Http\Requests\User\userLoginFormRequest;
 use App\Http\Requests\User\userSignupFormRequest;
 use App\Models\Task;
 use App\Models\User;
+use App\Traits\ApiResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends Controller
 {
+    use ApiResponse;
     /**
      * Display a listing of the resource.
      *
@@ -43,16 +46,18 @@ class UserController extends Controller
     public function userLogin(userLoginFormRequest $request)
     {
         try {
-            // dd(Auth::user());
             if ($some = Auth::guard('api')->attempt($request->only('email', 'password'))) {
-                // return $this->respondWithToken($some);
-                return response()->json(['success' => 'Login Successful', $this->respondWithToken($some)], 200);
+                return response()->json([
+                    "meta" => $this->customResponse('success', 'Login Successful', '200'),
+                    "data" => $this->respondWithToken($some)
+                ]);
                 // return redirect()->route('user.Dashboard')->with('success', 'Login Successfull');
             } else {
                 // return redirect()->back()->with('error', 'Please Check Credentials');
-                return response()->json(['error' => 'Please Check Credentials'], 401);
+                return response()->json([
+                    "meta" => $this->customResponse("ERROR", "Please check credentials", "401")
+                ]);
             }
-            return $this->respondWithToken($some);
         } catch (\Exception $exception) {
             dd($exception);
             return redirect()->back()->with('error', 'Temporary Server error');
@@ -92,7 +97,9 @@ class UserController extends Controller
         try {
             $user = User::where('email', $email['email'])->first();
             if (!isset($user)) {
-                return response()->json(['error' => 'Please enter registered email address']);
+                return response()->json([
+                    "meta" => $this->customResponse("ERROR", "Please Enter Registered email address", "401")
+                ]);
             }
             $digits = 4;
             $otp = rand(pow(10, $digits - 1), pow(10, $digits) - 1);
@@ -101,10 +108,14 @@ class UserController extends Controller
                 'otp' => $otp,
                 'otp_created_at' => $currentDateTime
             ]);
-            return response()->json(['success' => 'OTP has been sent on entered email address']);
+            return response()->json([
+                'meta' => $this->customResponse("OK", "OTP has been sent on entered email address", "200")
+            ]);
         } catch (\Exception $exception) {
-            // dd($exception);
-            return response()->json(['error' => 'Something Went Wrong'], 401);
+            dd($exception);
+            return response()->json([
+                "meta" => $this->customResponse("ERROR", "Something went wrong", "401")
+            ]);
         }
     }
 
@@ -114,14 +125,23 @@ class UserController extends Controller
             $storedOTP = User::where('email', $request->email)->first();
             $enteredOTP = $request->otp;
             if ($storedOTP->otp_created_at < Carbon::now()->format('Y-m-d H:i:m')) {
-                return response()->json(['error' => 'OTP has expired! Please generate new OTP']);
+                $this->setMeta("status", "ERROR");
+                $this->setMeta("message", __('message.OTPExpired'));
+                $this->setMeta('code', Response::HTTP_BAD_REQUEST);
+                return $this->setResponse();
             } elseif ($storedOTP->otp == $enteredOTP) {
-                return response()->json(['success' => 'OTP Verification Successful']);
+                return response()->json([
+                    "meta" => $this->customResponse('success', 'OTP Verification Successful', '200')
+                ]);
             } else {
-                return response()->json(['error' => 'Please Enter correct OTP']);
+                return response()->json([
+                    "meta" => $this->customResponse('error', 'Please Enter correct OTP', '401')
+                ]);
             }
         } catch (\Exception $exception) {
-            return response()->json(['error' => 'Something went wrong'], 401);
+            return response()->json([
+                "meta" => $this->customResponse('error', 'Something went wrong', '401')
+            ]);
         }
     }
 
@@ -130,24 +150,143 @@ class UserController extends Controller
         try {
             $validated = $request->validated();
             $user = User::where('email', $validated['email'])->first();
-            $user->update([
-                'password' => Hash::make($validated['password']),
-            ]);
-            return response()->json(['success', 'New Password has been successfully set'], 200);
+            if (isset($user)) {
+                $user->update([
+                    'password' => Hash::make($validated['password']),
+                ]);
+                $this->setMeta('status', "OK");
+                $this->setMeta('message', __('message.setPassword'));
+                $this->setMeta('code', Response::HTTP_OK);
+                return $this->setResponse();
+            } else {
+                $this->setMeta('status', "ERROR");
+                $this->setMeta('message', __('message.userUnauthorized'));
+                $this->setMeta('code', Response::HTTP_UNAUTHORIZED);
+                return $this->setResponse();
+            }
         } catch (\Exception $exception) {
-            return response()->json(['error' => 'Something went wrong'], 401);
+            $this->setMeta('status', "ERROR");
+            $this->setMeta('message', __('message.serviceUnavailableError'));
+            $this->setMeta('code', Response::HTTP_SERVICE_UNAVAILABLE);
+            return $this->setResponse();
         }
     }
 
-    public function getDashboard(Request $request)
+    public function jobCompletion()
     {
-        $dashboardData = $request->all();
-        return response()->json([
-            'inprogress' => $dashboardData['inprogress'],
-            'completed' => $dashboardData['completed'],
-            'manual_completion' => $dashboardData['manual_completion'],
-            'automatic_completion' => $dashboardData['automatic_completion']
-        ]);
+        $jobCompletionData = [
+            "associate1" => [
+                "id" => '1',
+                "name" => 'Anuj Panchal',
+                "inprogress" => "02",
+                "completed" => "04",
+                "manual_completion" => "01",
+                "automatic_completion" => "03"
+            ],
+            "associate2" => [
+                "id" => '2',
+                "name" => 'Umang Panchal',
+                "inprogress" => "10",
+                "completed" => "04",
+                "manual_completion" => "01",
+                "automatic_completion" => "03"
+            ],
+        ];
+        $inProgressData = collect($jobCompletionData)->pluck('inprogress')->sum();
+        $completedData = collect($jobCompletionData)->pluck('completed')->sum();
+        $manualCompletion = collect($jobCompletionData)->pluck('manual_completion')->sum();
+        $automaticCompletion = collect($jobCompletionData)->pluck('automatic_completion')->sum();
+        $this->setMeta("status", "OK");
+        $this->setMeta("message", __('message.dataGen'));
+        $this->setMeta("code", Response::HTTP_OK);
+        $this->setData('inprogress', $inProgressData);
+        $this->setData('completed', $completedData);
+        $this->setData('manual_completion', $manualCompletion);
+        $this->setData('automatic_completion', $automaticCompletion);
+        return $this->setResponse();
+    }
+
+    public function violationReported()
+    {
+        $violationReportedData = [
+            'against_associates' => [
+                "associate1" => [
+                    "id" => "1",
+                    "name" => "Anuj Panchal",
+                    "reports" => "02"
+                ],
+                "associate2" => [
+                    "id" => "2",
+                    "name" => "Umang Panchal",
+                    "reports" => "01"
+                ],
+                "associate3" => [
+                    "id" => "3",
+                    "name" => "Praful shah",
+                    "reports" => "01"
+                ],
+            ],
+            'against_residents' => [
+                'resident1' => [
+                    'id' => '1',
+                    'name' => 'Dhiraj patel',
+                    'reports' => '01'
+                ],
+                'resident2' => [
+                    'id' => '2',
+                    'name' => 'abc patel',
+                    'reports' => '01'
+                ],
+            ],
+        ];
+        $againstassociates = collect($violationReportedData['against_associates'])->pluck('reports')->sum();
+        $againstresidents = collect($violationReportedData['against_residents'])->pluck('reports')->sum();
+        $this->setMeta('status', "OK");
+        $this->setMeta('message', __('message.dataGen'));
+        $this->setMeta('code', Response::HTTP_OK);
+        $this->setData('against_associates', $againstassociates);
+        $this->setData('against_residents', $againstresidents);
+        return response($this->setResponse());
+    }
+
+    public function associateDetail()
+    {
+        $associateDetails = [
+            'associate1' => [
+                "id" => 1,
+                "manager_id" => 1,
+                "name" => "Anuj Panchal",
+                "check_in_status" => 0, // 0 = clock out
+                "profile_photo" => '/home/anuj/Pictures/user3.jpg'
+            ],
+            'associate2' => [
+                "id" => 2,
+                "manager_id" => 1,
+                "name" => "Umang Panchal",
+                "check_in_status" => 1, // 1 = clock in
+                "profile_photo" => '/home/anuj/Pictures/user1.jpg'
+            ],
+            'associate3' => [
+                "id" => 3,
+                "manager_id" => 1,
+                "name" => "Praful Shah",
+                "check_in_status" => 0,
+                "profile_photo" => '/home/anuj/Pictures/user2.jpg'
+            ],
+            'associate4' => [
+                "id" => 4,
+                "manager_id" => 1,
+                "name" => "Raj Choksi",
+                "check_in_status" => 1,
+                "profile_photo" => '/home/anuj/Pictures/images.png'
+            ],
+        ];
+        $associateDetails = collect($associateDetails);
+        $this->setMeta("status", "OK");
+        $this->setMeta("message", __('message.dataGen'));
+        $this->setMeta("code", Response::HTTP_OK);
+        $this->setData("associatesDetails", $associateDetails);
+        return $this->setResponse();
     }
 
     public function index()
