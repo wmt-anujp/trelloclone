@@ -7,6 +7,9 @@ use App\Http\Requests\User\ForgotPasswordRequest;
 use App\Http\Requests\User\NewPasswordRequest;
 use App\Http\Requests\User\userLoginFormRequest;
 use App\Http\Requests\User\userSignupFormRequest;
+use App\Models\Associate;
+use App\Models\Manager;
+use App\Models\Resident;
 use App\Models\Task;
 use App\Models\User;
 use App\Traits\ApiResponse;
@@ -31,37 +34,11 @@ class UserController extends Controller
 
     public function login()
     {
-        // $user = User::first();
-        // $token = auth()->login($user);
-        // dd($user);
         $credentials = request(['email', 'password']);
-        $anuj = Auth::guard('api')->attempt($credentials);
-        dd($anuj);
-        if (!$anuj) {
-            return response()->json(['error' => 'Please Check Credentials'], 401);
+        if (!$token = auth()->attempt($credentials)) {
+            return response()->json(['error' => 'Unauthorized'], 401);
         }
-        // return $this->respondWithToken($anuj);
-    }
-
-    public function userLogin(userLoginFormRequest $request)
-    {
-        try {
-            if ($some = Auth::guard('api')->attempt($request->only('email', 'password'))) {
-                return response()->json([
-                    "meta" => $this->customResponse('success', 'Login Successful', '200'),
-                    "data" => $this->respondWithToken($some)
-                ]);
-                // return redirect()->route('user.Dashboard')->with('success', 'Login Successfull');
-            } else {
-                // return redirect()->back()->with('error', 'Please Check Credentials');
-                return response()->json([
-                    "meta" => $this->customResponse("ERROR", "Please check credentials", "401")
-                ]);
-            }
-        } catch (\Exception $exception) {
-            dd($exception);
-            return redirect()->back()->with('error', 'Temporary Server error');
-        }
+        return $this->respondWithToken($token);
     }
 
     public function me()
@@ -82,7 +59,7 @@ class UserController extends Controller
         $newToken = auth()->refresh(true, true);
     }
 
-    protected function respondWithToken($token)
+    public function respondWithToken($token)
     {
         return response()->json([
             'access_token' => $token,
@@ -91,15 +68,43 @@ class UserController extends Controller
         ]);
     }
 
+    public function userLogin(userLoginFormRequest $request)
+    {
+        $credentials = $request->validated();
+        try {
+            if ($token = Auth::guard('api')->attempt($credentials)) {
+                $this->setMeta("status", "OK");
+                $this->setMeta("message", __('message.loginsuccess'));
+                $this->setMeta("code", Response::HTTP_OK);
+                $this->setMeta('Token', $this->respondWithToken($token));
+                return $this->setResponse();
+                // return redirect()->route('user.Dashboard')->with('success', 'Login Successfull');
+            } else {
+                // return redirect()->back()->with('error', 'Please Check Credentials');
+                $this->setMeta('status', 'ERROR');
+                $this->setMeta('message', __('message.loginerror'));
+                $this->setMeta('code', Response::HTTP_UNAUTHORIZED);
+                return $this->setResponse();
+            }
+        } catch (\Exception $exception) {
+            $this->setMeta('status', 'ERROR');
+            $this->setMeta('message', __('message.servererror'));
+            $this->setMeta('code', Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->setResponse();
+            // return redirect()->back()->with('error', 'Temporary Server error');
+        }
+    }
+
     public function forgotPassword(ForgotPasswordRequest $request)
     {
         $email = $request->validated();
         try {
             $user = User::where('email', $email['email'])->first();
             if (!isset($user)) {
-                return response()->json([
-                    "meta" => $this->customResponse("ERROR", "Please Enter Registered email address", "401")
-                ]);
+                $this->setMeta("status", "ERROR");
+                $this->setMeta("message", __('message.otpemailerror'));
+                $this->setMeta('code', Response::HTTP_UNAUTHORIZED);
+                return $this->setResponse();
             }
             $digits = 4;
             $otp = rand(pow(10, $digits - 1), pow(10, $digits) - 1);
@@ -108,14 +113,15 @@ class UserController extends Controller
                 'otp' => $otp,
                 'otp_created_at' => $currentDateTime
             ]);
-            return response()->json([
-                'meta' => $this->customResponse("OK", "OTP has been sent on entered email address", "200")
-            ]);
+            $this->setMeta("status", "OK");
+            $this->setMeta("message", __('message.otpsentsuccess'));
+            $this->setMeta('code', Response::HTTP_OK);
+            return $this->setResponse();
         } catch (\Exception $exception) {
-            dd($exception);
-            return response()->json([
-                "meta" => $this->customResponse("ERROR", "Something went wrong", "401")
-            ]);
+            $this->setMeta("status", "ERROR");
+            $this->setMeta("message", __('message.serviceUnavailableError'));
+            $this->setMeta('code', Response::HTTP_SERVICE_UNAVAILABLE);
+            return $this->setResponse();
         }
     }
 
@@ -130,18 +136,21 @@ class UserController extends Controller
                 $this->setMeta('code', Response::HTTP_BAD_REQUEST);
                 return $this->setResponse();
             } elseif ($storedOTP->otp == $enteredOTP) {
-                return response()->json([
-                    "meta" => $this->customResponse('success', 'OTP Verification Successful', '200')
-                ]);
+                $this->setMeta('status', 'OK');
+                $this->setMeta('message', __('message.otpverificationsuccess'));
+                $this->setMeta('code', Response::HTTP_OK);
+                return $this->setResponse();
             } else {
-                return response()->json([
-                    "meta" => $this->customResponse('error', 'Please Enter correct OTP', '401')
-                ]);
+                $this->setMeta('status', 'ERROR');
+                $this->setMeta('message', __('message.otpverificationerror'));
+                $this->setMeta('code', Response::HTTP_UNAUTHORIZED);
+                return $this->setResponse();
             }
         } catch (\Exception $exception) {
-            return response()->json([
-                "meta" => $this->customResponse('error', 'Something went wrong', '401')
-            ]);
+            $this->setMeta("status", "ERROR");
+            $this->setMeta("message", __('message.serviceUnavailableError'));
+            $this->setMeta('code', Response::HTTP_SERVICE_UNAVAILABLE);
+            return $this->setResponse();
         }
     }
 
@@ -208,37 +217,39 @@ class UserController extends Controller
 
     public function violationReported()
     {
-        $violationReportedData = [
-            'against_associates' => [
-                "associate1" => [
-                    "id" => "1",
-                    "name" => "Anuj Panchal",
-                    "reports" => "02"
-                ],
-                "associate2" => [
-                    "id" => "2",
-                    "name" => "Umang Panchal",
-                    "reports" => "01"
-                ],
-                "associate3" => [
-                    "id" => "3",
-                    "name" => "Praful shah",
-                    "reports" => "01"
-                ],
-            ],
-            'against_residents' => [
-                'resident1' => [
-                    'id' => '1',
-                    'name' => 'Dhiraj patel',
-                    'reports' => '01'
-                ],
-                'resident2' => [
-                    'id' => '2',
-                    'name' => 'abc patel',
-                    'reports' => '01'
-                ],
-            ],
-        ];
+        // $violationReportedData = [
+        //     'against_associates' => [
+        //         "associate1" => [
+        //             "id" => "1",
+        //             "name" => "Anuj Panchal",
+        //             "reports" => "02"
+        //         ],
+        //         "associate2" => [
+        //             "id" => "2",
+        //             "name" => "Umang Panchal",
+        //             "reports" => "01"
+        //         ],
+        //         "associate3" => [
+        //             "id" => "3",
+        //             "name" => "Praful shah",
+        //             "reports" => "01"
+        //         ],
+        //     ],
+        //     'against_residents' => [
+        //         'resident1' => [
+        //             'id' => '1',
+        //             'name' => 'Dhiraj patel',
+        //             'reports' => '01'
+        //         ],
+        //         'resident2' => [
+        //             'id' => '2',
+        //             'name' => 'abc patel',
+        //             'reports' => '01'
+        //         ],
+        //     ],
+        // ];
+        $violationReportedData = Resident::with('againstResidents')->get();
+        dd($violationReportedData);
         $againstassociates = collect($violationReportedData['against_associates'])->pluck('reports')->sum();
         $againstresidents = collect($violationReportedData['against_residents'])->pluck('reports')->sum();
         $this->setMeta('status', "OK");
@@ -251,37 +262,33 @@ class UserController extends Controller
 
     public function associateDetail()
     {
-        $associateDetails = [
-            'associate1' => [
-                "id" => 1,
-                "manager_id" => 1,
-                "name" => "Anuj Panchal",
-                "check_in_status" => 0, // 0 = clock out
-                "profile_photo" => '/home/anuj/Pictures/user3.jpg'
-            ],
-            'associate2' => [
-                "id" => 2,
-                "manager_id" => 1,
-                "name" => "Umang Panchal",
-                "check_in_status" => 1, // 1 = clock in
-                "profile_photo" => '/home/anuj/Pictures/user1.jpg'
-            ],
-            'associate3' => [
-                "id" => 3,
-                "manager_id" => 1,
-                "name" => "Praful Shah",
-                "check_in_status" => 0,
-                "profile_photo" => '/home/anuj/Pictures/user2.jpg'
-            ],
-            'associate4' => [
-                "id" => 4,
-                "manager_id" => 1,
-                "name" => "Raj Choksi",
-                "check_in_status" => 1,
-                "profile_photo" => '/home/anuj/Pictures/images.png'
-            ],
-        ];
-        $associateDetails = collect($associateDetails);
+        // $associateDetails = [
+        //     'associate1' => [
+        //         "id" => 1,
+        //         "manager_id" => 1,
+        //         "name" => "Anuj Panchal",
+        //         "check_in_status" => 0, // 0 = clock out
+        //         "profile_photo" => '/home/anuj/Pictures/user3.jpg'
+        //     ],
+        //     'associate2' => [
+        //         "id" => 2,
+        //         "manager_id" => 1,
+        //         "name" => "Umang Panchal",
+        //         "check_in_status" => 1, // 1 = clock in
+        //         "profile_photo" => '/home/anuj/Pictures/user1.jpg'
+        //     ],
+        //     'associate3' => [
+        //         "id" => 3,
+        //         "manager_id" => 1,
+        //         "name" => "Praful Shah",
+        //         "check_in_status" => 0,
+        //         "profile_photo" => '/home/anuj/Pictures/user2.jpg'
+        //     ],
+        // ];
+        // $user = Auth::guard('api')->user();
+        // dd($user);
+        $manager = Manager::where('id', 1)->first();
+        $associateDetails = Associate::where('manager_id', $manager->id)->with('manager')->get();
         $this->setMeta("status", "OK");
         $this->setMeta("message", __('message.dataGen'));
         $this->setMeta("code", Response::HTTP_OK);
