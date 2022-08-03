@@ -3,12 +3,11 @@
 return [
     'dataGen' => 'Data has been fetched',
     'setPassword' => 'New Password has been successfully set',
-    'serviceUnavailableError' => 'Something went wrong',
+    'serviceUnavailableError' => 'Temporary Server Error',
     'userUnauthorized' => 'User is Unauthorized',
     'OTPExpired' => 'OTP has expired! Please generate new OTP',
     'loginsuccess' => 'Login Successful',
     'loginerror' => 'Please Check Credentials',
-    'servererror' => 'Temporary Server Error',
     'otpverificationsuccess' => 'OTP Verification Successful',
     'otpverificationerror' => 'Please Enter correct OTP',
     'otpemailerror' => 'Please Enter Registered email address',

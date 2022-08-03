@@ -14,8 +14,10 @@ class AddColumnToAssociatesTable extends Migration
     public function up()
     {
         Schema::table('associates', function (Blueprint $table) {
-            $table->unsignedBigInteger('manager_id')->after('id')->nullable();
-            $table->foreign('manager_id')->references('id')->on('managers')->onDelete('cascade')->onUpdate('cascade');
+            // $table->unsignedBigInteger('manager_id')->after('id')->nullable();
+            // $table->foreign('manager_id')->references('id')->on('managers')->onDelete('cascade')->onUpdate('cascade');
+            $table->boolean('manual_completion')->default(0)->after('check_in_status');
+            $table->boolean('automatic_completion')->default(0)->after('manual_completion');
         });
     }
 

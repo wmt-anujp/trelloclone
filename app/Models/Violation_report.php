@@ -5,8 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Resident extends Model
+class Violation_report extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'email', 'house_number'];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

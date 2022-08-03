@@ -12,6 +12,7 @@ use App\Models\Manager;
 use App\Models\Resident;
 use App\Models\Task;
 use App\Models\User;
+use App\Models\Violation_report;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
@@ -61,6 +62,11 @@ class UserController extends Controller
 
     public function respondWithToken($token)
     {
+        // return response()->json([
+        //     $this->setMeta("access_token", $token),
+        //     $this->setMeta('token_type', 'bearer'),
+        //     $this->setMeta('expires_in', auth()->factory()->getTTL() * 60),
+        // ]);
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
@@ -70,26 +76,28 @@ class UserController extends Controller
 
     public function userLogin(userLoginFormRequest $request)
     {
-        $credentials = $request->validated();
         try {
+            $credentials = $request->validated();
             if ($token = Auth::guard('api')->attempt($credentials)) {
                 $this->setMeta("status", "OK");
                 $this->setMeta("message", __('message.loginsuccess'));
                 $this->setMeta("code", Response::HTTP_OK);
-                $this->setMeta('Token', $this->respondWithToken($token));
+                $this->setData('access_token', $token);
+                $this->setData('token_type', 'bearer');
+                $this->setData('expired_in', auth()->factory()->getTTL() * 60);
                 return $this->setResponse();
                 // return redirect()->route('user.Dashboard')->with('success', 'Login Successfull');
             } else {
-                // return redirect()->back()->with('error', 'Please Check Credentials');
                 $this->setMeta('status', 'ERROR');
                 $this->setMeta('message', __('message.loginerror'));
                 $this->setMeta('code', Response::HTTP_UNAUTHORIZED);
                 return $this->setResponse();
+                // return redirect()->back()->with('error', 'Please Check Credentials');
             }
         } catch (\Exception $exception) {
             $this->setMeta('status', 'ERROR');
-            $this->setMeta('message', __('message.servererror'));
-            $this->setMeta('code', Response::HTTP_INTERNAL_SERVER_ERROR);
+            $this->setMeta('message', __('message.serviceUnavailableError'));
+            $this->setMeta('code', Response::HTTP_SERVICE_UNAVAILABLE);
             return $this->setResponse();
             // return redirect()->back()->with('error', 'Temporary Server error');
         }
@@ -97,8 +105,8 @@ class UserController extends Controller
 
     public function forgotPassword(ForgotPasswordRequest $request)
     {
-        $email = $request->validated();
         try {
+            $email = $request->validated();
             $user = User::where('email', $email['email'])->first();
             if (!isset($user)) {
                 $this->setMeta("status", "ERROR");
@@ -183,36 +191,43 @@ class UserController extends Controller
 
     public function jobCompletion()
     {
-        $jobCompletionData = [
-            "associate1" => [
-                "id" => '1',
-                "name" => 'Anuj Panchal',
-                "inprogress" => "02",
-                "completed" => "04",
-                "manual_completion" => "01",
-                "automatic_completion" => "03"
-            ],
-            "associate2" => [
-                "id" => '2',
-                "name" => 'Umang Panchal',
-                "inprogress" => "10",
-                "completed" => "04",
-                "manual_completion" => "01",
-                "automatic_completion" => "03"
-            ],
-        ];
-        $inProgressData = collect($jobCompletionData)->pluck('inprogress')->sum();
-        $completedData = collect($jobCompletionData)->pluck('completed')->sum();
-        $manualCompletion = collect($jobCompletionData)->pluck('manual_completion')->sum();
-        $automaticCompletion = collect($jobCompletionData)->pluck('automatic_completion')->sum();
-        $this->setMeta("status", "OK");
-        $this->setMeta("message", __('message.dataGen'));
-        $this->setMeta("code", Response::HTTP_OK);
-        $this->setData('inprogress', $inProgressData);
-        $this->setData('completed', $completedData);
-        $this->setData('manual_completion', $manualCompletion);
-        $this->setData('automatic_completion', $automaticCompletion);
-        return $this->setResponse();
+        // $jobCompletionData = [
+        //     "associate1" => [
+        //         "id" => '1',
+        //         "name" => 'Anuj Panchal',
+        //         "inprogress" => "02",
+        //         "completed" => "04",
+        //         "manual_completion" => "01",
+        //         "automatic_completion" => "03"
+        //     ],
+        //     "associate2" => [
+        //         "id" => '2',
+        //         "name" => 'Umang Panchal',
+        //         "inprogress" => "10",
+        //         "completed" => "04",
+        //         "manual_completion" => "01",
+        //         "automatic_completion" => "03"
+        //     ],
+        // ];
+        try {
+            $inProgressData = Associate::where(['manager_id' => 1, 'check_in_status' => 1])->get()->count();
+            $completedData = Associate::where(['manager_id' => 1, 'check_in_status' => 0])->get()->count();
+            $manualCompletionData = Associate::where(['manager_id' => 1, 'manual_completion' => 1])->get()->count();
+            $automaticCompletionData = Associate::where(['manager_id' => 1, 'automatic_completion' => 1])->get()->count();
+            $this->setMeta("status", "OK");
+            $this->setMeta("message", __('message.dataGen'));
+            $this->setMeta("code", Response::HTTP_OK);
+            $this->setData('inprogress', $inProgressData);
+            $this->setData('completed', $completedData);
+            $this->setData('manual_completion', $manualCompletionData);
+            $this->setData('automatic_completion', $automaticCompletionData);
+            return $this->setResponse();
+        } catch (\Exception $exception) {
+            $this->setMeta('status', "ERROR");
+            $this->setMeta('message', __('message.serviceUnavailableError'));
+            $this->setMeta('code', Response::HTTP_SERVICE_UNAVAILABLE);
+            return $this->setResponse();
+        }
     }
 
     public function violationReported()
@@ -248,16 +263,23 @@ class UserController extends Controller
         //         ],
         //     ],
         // ];
-        $violationReportedData = Resident::with('againstResidents')->get();
-        dd($violationReportedData);
-        $againstassociates = collect($violationReportedData['against_associates'])->pluck('reports')->sum();
-        $againstresidents = collect($violationReportedData['against_residents'])->pluck('reports')->sum();
-        $this->setMeta('status', "OK");
-        $this->setMeta('message', __('message.dataGen'));
-        $this->setMeta('code', Response::HTTP_OK);
-        $this->setData('against_associates', $againstassociates);
-        $this->setData('against_residents', $againstresidents);
-        return response($this->setResponse());
+        try {
+            $againstassociates = Violation_report::where('report_type', 1)->with('user')->get();
+            $againstresidents = Violation_report::where('report_type', 2)->with('user')->get();
+            $againstassociates = collect($againstassociates)->count();
+            $againstresidents = collect($againstresidents)->count();
+            $this->setMeta('status', "OK");
+            $this->setMeta('message', __('message.dataGen'));
+            $this->setMeta('code', Response::HTTP_OK);
+            $this->setData('against_associates', $againstassociates);
+            $this->setData('against_residents', $againstresidents);
+            return response($this->setResponse());
+        } catch (\Exception $exception) {
+            $this->setMeta('status', "ERROR");
+            $this->setMeta('message', __('message.serviceUnavailableError'));
+            $this->setMeta('code', Response::HTTP_SERVICE_UNAVAILABLE);
+            return $this->setResponse();
+        }
     }
 
     public function associateDetail()
@@ -287,13 +309,20 @@ class UserController extends Controller
         // ];
         // $user = Auth::guard('api')->user();
         // dd($user);
-        $manager = Manager::where('id', 1)->first();
-        $associateDetails = Associate::where('manager_id', $manager->id)->with('manager')->get();
-        $this->setMeta("status", "OK");
-        $this->setMeta("message", __('message.dataGen'));
-        $this->setMeta("code", Response::HTTP_OK);
-        $this->setData("associatesDetails", $associateDetails);
-        return $this->setResponse();
+        try {
+            $manager = Manager::where('id', 1)->first();
+            $associateDetails = Associate::where('manager_id', $manager->id)->with('manager')->get();
+            $this->setMeta("status", "OK");
+            $this->setMeta("message", __('message.dataGen'));
+            $this->setMeta("code", Response::HTTP_OK);
+            $this->setData("associatesDetails", $associateDetails);
+            return $this->setResponse();
+        } catch (\Exception $exception) {
+            $this->setMeta('status', "ERROR");
+            $this->setMeta('message', __('message.serviceUnavailableError'));
+            $this->setMeta('code', Response::HTTP_SERVICE_UNAVAILABLE);
+            return $this->setResponse();
+        }
     }
 
     public function index()

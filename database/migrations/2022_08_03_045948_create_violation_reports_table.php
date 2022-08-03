@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateViolationAgainstAssociatesTable extends Migration
+class CreateViolationReportsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,12 @@ class CreateViolationAgainstAssociatesTable extends Migration
      */
     public function up()
     {
-        Schema::create('violation_against_associates', function (Blueprint $table) {
+        Schema::create('violation_reports', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id');
-            $table->foreign('user_id')->references('id')->on('associates')->onDelete('cascade');
-            $table->boolean('reports')->default(0);
-            $table->string('report_description');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+            $table->boolean('reports')->nullable();
+            $table->boolean('report_type')->comment('1=against associates, 2=against residents');
             $table->timestamps();
         });
     }
@@ -30,6 +30,6 @@ class CreateViolationAgainstAssociatesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('violation_against_associates');
+        Schema::dropIfExists('violation_reports');
     }
 }
