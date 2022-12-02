@@ -85,21 +85,19 @@ class UserController extends Controller
                 $this->setData('access_token', $token);
                 $this->setData('token_type', 'bearer');
                 $this->setData('expired_in', auth()->factory()->getTTL() * 60);
-                return $this->setResponse();
-                // return redirect()->route('user.Dashboard')->with('success', 'Login Successfull');
+                return redirect()->route('user.Dashboard')->with('success', 'Login Successfull');
             } else {
                 $this->setMeta('status', 'ERROR');
                 $this->setMeta('message', __('message.loginerror'));
                 $this->setMeta('code', Response::HTTP_UNAUTHORIZED);
-                return $this->setResponse();
-                // return redirect()->back()->with('error', 'Please Check Credentials');
+                return redirect()->back()->with('error', 'Please Check Credentials');
             }
         } catch (\Exception $exception) {
-            $this->setMeta('status', 'ERROR');
-            $this->setMeta('message', __('message.serviceUnavailableError'));
-            $this->setMeta('code', Response::HTTP_SERVICE_UNAVAILABLE);
-            return $this->setResponse();
-            // return redirect()->back()->with('error', 'Temporary Server error');
+            // $this->setMeta('status', 'ERROR');
+            // $this->setMeta('message', __('message.serviceUnavailableError'));
+            // $this->setMeta('code', Response::HTTP_SERVICE_UNAVAILABLE);
+            // return $this->setResponse();
+            return redirect()->back()->with('error', 'Temporary Server error');
         }
     }
 
