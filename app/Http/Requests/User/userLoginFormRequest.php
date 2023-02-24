@@ -40,12 +40,4 @@ class userLoginFormRequest extends FormRequest
             'password.required' => 'Please Enter Password',
         ];
     }
-
-    protected function failedValidation(Validator $validator)
-    {
-        // $this->setMeta('message', $validator->messages()->first());
-        // $this->setMeta('status', 'fail');
-        $response = new JsonResponse($validator->messages()->first());
-        throw (new ValidationException($validator, $response))->status(404);
-    }
 }

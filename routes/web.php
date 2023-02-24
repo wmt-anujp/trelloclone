@@ -20,11 +20,6 @@ Route::namespace('User')->middleware('backbutton')->group(function () {
     Route::namespace('Auth')->middleware('guest')->group(function () {
         Route::resource('user', 'UserController');
         Route::get('/', function () {
-            // $obj = [
-            //     'name' => 'anuj',
-            //     'email' => 'anuj@gmail.com'
-            // ];
-            // dd($obj);
             return view('User.login');
         })->name('user.Login');
         Route::post('user-login', [UserController::class, 'userLogin'])->name('user.Logins');
